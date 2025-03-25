@@ -44,8 +44,8 @@ int main() {
         double precio_total = atof(total_price);
 
         // Mostrar los datos leídos
-        printf("ID: %s, Orden: %s, Nombre: %s, Cantidad: %d, Fecha: %s, Precio Total: %.2f, Categoría: %s, Pizza: %s\n",
-               pizza_id, order_id, pizza_name_id, cantidad, order_date, precio_total, pizza_category, pizza_name);
+        printf("ID: %s, Orden: %s, Nombre: %s, Cantidad: %d, Fecha: %s, Precio_unitario %.2f; Precio Total: %.2f, Categoría: %s, Pizza: %s\n",
+               pizza_id, order_id, pizza_name_id, cantidad, order_date, precio_unitario, precio_total, pizza_category, pizza_name);
     }
 
     free(linea); //liberar memoria de getline()
