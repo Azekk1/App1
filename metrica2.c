@@ -30,12 +30,21 @@ typedef struct {
     int cantidad_vendida;
 } VentaCategoria;
 
-int main() {
-    FILE *archivo = fopen("ventas.csv", "r"); 
-    if (archivo == NULL) {
-        printf("Error al abrir el archivo\n");
-        return 0;
+int main(int argc, char *argv[]) {
+    // Proporcionar un archivo como argumento directamente en el terminal
+    if (argc < 2) {
+        printf("Uso: %s <archivo_csv>\n", argv[0]);
+        return 1;
     }
+
+    // Se abre el archivo csv especificado
+    FILE *archivo = fopen(argv[1], "r");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo: %s\n", argv[1]);
+        return 1;
+    }
+
+    printf("Archivo %s abierto correctamente.\n", argv[1]);
 
     char *linea = NULL;
     size_t len = 0;
@@ -161,7 +170,7 @@ if (strcmp(comando, "pms") == 0) {
             masVendida = ventasPorPizza[i];
         }
     }
-    printf("Pizza más vendida: %s con %d ventas\n", masVendida.nombre, masVendida.cantidad_vendida);
+    printf("Pizza más vendida: %s con %d ventas", masVendida.nombre, masVendida.cantidad_vendida);
 }
     // Comando pls - Pizza menos vendida
     else if (strcmp(comando, "pls") == 0) {
