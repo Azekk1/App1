@@ -31,7 +31,7 @@ void limpiar_entrada(char* str) {
     }
 }
 
-//pizza mas vendida - pms
+// calcular pizza mas vendida - pms
 char* pms(int *size, struct order *orders) {
     int max_cantidad = 0;
     int index_mas_vendida = -1;
@@ -57,7 +57,7 @@ char* pms(int *size, struct order *orders) {
         }
     }
 
-    // Buscar índice de la pizza más vendida
+    //buscar indice de la pizza mas vendida
     for (int i = 0; i < n_distintas; i++) {
         if (cantidades[i] > max_cantidad) {
             max_cantidad = cantidades[i];
@@ -65,7 +65,7 @@ char* pms(int *size, struct order *orders) {
         }
     }
 
-    // Buscar el nombre completo de la pizza más vendida
+    //buscamos el nombre completo de la pizza mas vendida
     for (int i = 0; i < *size; i++) {
         if (strcmp(orders[i].pizza_name_id, nombres[index_mas_vendida]) == 0) {
             char* resultado = malloc(strlen(orders[i].pizza_name) + 1);
@@ -76,6 +76,54 @@ char* pms(int *size, struct order *orders) {
 
     return NULL;
 }
+
+//calculamos pizza menos vendida pls
+char* pls(int *size, struct order *orders) {
+    int cantidades[MAX_ORDERS];
+    char nombres[MAX_ORDERS][MAX_NAME_LENGTH];
+    int n_distintas = 0;
+
+    // Contar cuántas unidades se vendieron de cada pizza
+    for (int i = 0; i < *size; i++) {
+        int encontrado = 0;
+        for (int j = 0; j < n_distintas; j++) {
+            if (strcmp(nombres[j], orders[i].pizza_name_id) == 0) {
+                cantidades[j] += orders[i].quantity;
+                encontrado = 1;
+                break;
+            }
+        }
+        if (!encontrado) {
+            strncpy(nombres[n_distintas], orders[i].pizza_name_id, MAX_NAME_LENGTH);
+            cantidades[n_distintas] = orders[i].quantity;
+            n_distintas++;
+        }
+    }
+
+    // Encontrar índice de la pizza menos vendida
+    int min_cantidad = cantidades[0];
+    int index_menos_vendida = 0;
+    for (int i = 1; i < n_distintas; i++) {
+        if (cantidades[i] < min_cantidad) {
+            min_cantidad = cantidades[i];
+            index_menos_vendida = i;
+        }
+    }
+
+    // Buscar el nombre completo correspondiente
+    for (int i = 0; i < *size; i++) {
+        if (strcmp(orders[i].pizza_name_id, nombres[index_menos_vendida]) == 0) {
+            char* resultado = malloc(strlen(orders[i].pizza_name) + 1);
+            if (resultado) {
+                strcpy(resultado, orders[i].pizza_name);
+            }
+            return resultado;
+        }
+    }
+
+    return NULL;
+}
+
 
 
 //leemos CSV que puede o no estar entre comillas
@@ -150,28 +198,24 @@ int main() {
 
         orders[count++] = temp;
 
-        //print de depuracion, lo podemos eliminar al ver que este todo bien
-        printf("Pedido %d:\n", count);
-        printf("  Pizza ID: %d\n", temp.pizza_id);
-        printf("  Order ID: %d\n", temp.order_id);
-        printf("  Pizza Name ID: %s\n", temp.pizza_name_id);
-        printf("  Cantidad: %d\n", temp.quantity);
-        printf("  Fecha: %s\n", temp.order_date);
-        printf("  Hora: %s\n", temp.order_time);
-        printf("  Precio unitario: %.2f\n", temp.unit_price);
-        printf("  Precio total: %.2f\n", temp.total_price);
-        printf("  Tamaño: %s\n", temp.pizza_size);
-        printf("  Categoría: %s\n", temp.pizza_category);
-        printf("  Ingredientes: %s\n", temp.pizza_ingredients);
-        printf("  Nombre pizza: %s\n", temp.pizza_name);
-        printf("-------------------------------------\n");
+        
     }
 
     printf("Se procesaron %d pedidos correctamente.\n", count);
+
+    //entrega pizza mas vendida
     char* mas_vendida = pms(&count, orders);
     if (mas_vendida) {
        printf("Pizza más vendida: %s\n", mas_vendida);
-       free(mas_vendida); // liberar memoria reservada por pms
+       free(mas_vendida); // liberar memoria reservada por pms  
+
+    //entrega pizza menos vendida 
+    char* menos_vendida = pls(&count, orders);
+    if (menos_vendida) {
+       printf("Pizza menos vendida: %s\n", menos_vendida);
+       free(menos_vendida);
+}
+   
 }
 
 
