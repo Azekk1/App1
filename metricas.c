@@ -31,7 +31,7 @@ void limpiar_entrada(char* str) {
     }
 }
 
-// calcular pizza mas vendida - pms
+//CALCULAMOS PIZZA MAS VENDIA - pms
 char* pms(int *size, struct order *orders) {
     int max_cantidad = 0;
     int index_mas_vendida = -1;
@@ -77,7 +77,7 @@ char* pms(int *size, struct order *orders) {
     return NULL;
 }
 
-//calculamos pizza menos vendida pls
+//CALCULAMOS PIZZA MENOS VENDIDA - pls
 char* pls(int *size, struct order *orders) {
     int cantidades[MAX_ORDERS];
     char nombres[MAX_ORDERS][MAX_NAME_LENGTH];
@@ -124,7 +124,7 @@ char* pls(int *size, struct order *orders) {
     return NULL;
 }
 
-//fecha con mas ventas
+//FECHA CON MAS VENTAS $$$$$
 char* dms(int *size, struct order *orders) {
     char fechas[MAX_ORDERS][MAX_DATE_LENGTH];
     float montos[MAX_ORDERS];
@@ -163,6 +163,51 @@ char* dms(int *size, struct order *orders) {
     char* resultado = malloc(100);
     if (resultado) {
         snprintf(resultado, 100, "%s - $%.2f", fechas[index_max], max_monto);
+    }
+
+    return resultado;
+}
+
+//FECHA CON MENOS VENTAS $$$$
+char* dls(int *size, struct order *orders) {
+    char fechas[MAX_ORDERS][MAX_DATE_LENGTH];
+    float montos[MAX_ORDERS];
+    int n_fechas = 0;
+
+    // Agrupar montos por fecha
+    for (int i = 0; i < *size; i++) {
+        int encontrada = 0;
+        for (int j = 0; j < n_fechas; j++) {
+            if (strcmp(fechas[j], orders[i].order_date) == 0) {
+                montos[j] += orders[i].total_price;
+                encontrada = 1;
+                break;
+            }
+        }
+        if (!encontrada) {
+            strncpy(fechas[n_fechas], orders[i].order_date, MAX_DATE_LENGTH);
+            montos[n_fechas] = orders[i].total_price;
+            n_fechas++;
+        }
+    }
+
+    if (n_fechas == 0) return NULL;
+
+    // Buscar la fecha con menor recaudación
+    float min_monto = montos[0];
+    int index_min = 0;
+
+    for (int i = 1; i < n_fechas; i++) {
+        if (montos[i] < min_monto) {
+            min_monto = montos[i];
+            index_min = i;
+        }
+    }
+
+    // Formatear y retornar resultado
+    char* resultado = malloc(100);
+    if (resultado) {
+        snprintf(resultado, 100, "%s - $%.2f", fechas[index_min], min_monto);
     }
 
     return resultado;
@@ -260,12 +305,20 @@ int main() {
        free(menos_vendida);
     }
 
-    //fecha con mas ventas
+    //fecha con mas ventas $$$$
     char* fecha_mayor_ventas = dms(&count, orders);
     if (fecha_mayor_ventas) {
        printf("Día con más ventas: %s\n", fecha_mayor_ventas);
        free(fecha_mayor_ventas);
     }
+
+    //FECHA CON MENOS VENTAS $$$
+    char* fecha_menor_ventas = dls(&count, orders);
+    if (fecha_menor_ventas) {
+       printf("Día con menos ventas: %s\n", fecha_menor_ventas);
+       free(fecha_menor_ventas);
+}
+
 
 
 
