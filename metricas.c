@@ -83,7 +83,7 @@ char* pls(int *size, struct order *orders) {
     char nombres[MAX_ORDERS][MAX_NAME_LENGTH];
     int n_distintas = 0;
 
-    // Contar cuántas unidades se vendieron de cada pizza
+    //ver cuaantas unidades se vendieron de cada pizza
     for (int i = 0; i < *size; i++) {
         int encontrado = 0;
         for (int j = 0; j < n_distintas; j++) {
@@ -100,7 +100,7 @@ char* pls(int *size, struct order *orders) {
         }
     }
 
-    // Encontrar índice de la pizza menos vendida
+    //encontrar indice de la pizza menos vendida
     int min_cantidad = cantidades[0];
     int index_menos_vendida = 0;
     for (int i = 1; i < n_distintas; i++) {
@@ -110,7 +110,7 @@ char* pls(int *size, struct order *orders) {
         }
     }
 
-    // Buscar el nombre completo correspondiente
+    //buscar el nombre completo 
     for (int i = 0; i < *size; i++) {
         if (strcmp(orders[i].pizza_name_id, nombres[index_menos_vendida]) == 0) {
             char* resultado = malloc(strlen(orders[i].pizza_name) + 1);
@@ -124,6 +124,49 @@ char* pls(int *size, struct order *orders) {
     return NULL;
 }
 
+//fecha con mas ventas
+char* dms(int *size, struct order *orders) {
+    char fechas[MAX_ORDERS][MAX_DATE_LENGTH];
+    float montos[MAX_ORDERS];
+    int n_fechas = 0;
+
+    //agrupar por fecha
+    for (int i = 0; i < *size; i++) {
+        int encontrada = 0;
+        for (int j = 0; j < n_fechas; j++) {
+            if (strcmp(fechas[j], orders[i].order_date) == 0) {
+                montos[j] += orders[i].total_price;
+                encontrada = 1;
+                break;
+            }
+        }
+        if (!encontrada) {
+            strncpy(fechas[n_fechas], orders[i].order_date, MAX_DATE_LENGTH);
+            montos[n_fechas] = orders[i].total_price;
+            n_fechas++;
+        }
+    }
+
+    //encontrar la fecha con mas dinero recaudado
+    float max_monto = 0.0;
+    int index_max = -1;
+    for (int i = 0; i < n_fechas; i++) {
+        if (montos[i] > max_monto) {
+            max_monto = montos[i];
+            index_max = i;
+        }
+    }
+
+    if (index_max == -1) return NULL;
+
+    //crear el resultado como string dinámico
+    char* resultado = malloc(100);
+    if (resultado) {
+        snprintf(resultado, 100, "%s - $%.2f", fechas[index_max], max_monto);
+    }
+
+    return resultado;
+}
 
 
 //leemos CSV que puede o no estar entre comillas
@@ -140,7 +183,7 @@ char* leer_campo_csv(char** cursor) {
     while (**cursor) {
         if (entre_comillas) {
             if (**cursor == '"' && *((*cursor)+1) == ',') {
-                (*cursor) += 2;  // Saltar comilla y coma
+                (*cursor) += 2;  //saltar comilla y coma
                 break;
             }
         } else {
@@ -208,15 +251,22 @@ int main() {
     if (mas_vendida) {
        printf("Pizza más vendida: %s\n", mas_vendida);
        free(mas_vendida); // liberar memoria reservada por pms  
+    }
 
     //entrega pizza menos vendida 
     char* menos_vendida = pls(&count, orders);
     if (menos_vendida) {
        printf("Pizza menos vendida: %s\n", menos_vendida);
        free(menos_vendida);
-}
-   
-}
+    }
+
+    //fecha con mas ventas
+    char* fecha_mayor_ventas = dms(&count, orders);
+    if (fecha_mayor_ventas) {
+       printf("Día con más ventas: %s\n", fecha_mayor_ventas);
+       free(fecha_mayor_ventas);
+    }
+
 
 
 
