@@ -31,7 +31,54 @@ void limpiar_entrada(char* str) {
     }
 }
 
-// Función para leer un campo del CSV que puede o no estar entre comillas
+//pizza mas vendida - pms
+char* pms(int *size, struct order *orders) {
+    int max_cantidad = 0;
+    int index_mas_vendida = -1;
+
+    char nombres[MAX_ORDERS][MAX_NAME_LENGTH];
+    int cantidades[MAX_ORDERS];
+    int n_distintas = 0;
+
+    for (int i = 0; i < *size; i++) {
+        int encontrado = 0;
+        for (int j = 0; j < n_distintas; j++) {
+            if (strcmp(nombres[j], orders[i].pizza_name_id) == 0) {
+                cantidades[j] += orders[i].quantity;
+                encontrado = 1;
+                break;
+            }
+        }
+
+        if (!encontrado) {
+            strncpy(nombres[n_distintas], orders[i].pizza_name_id, MAX_NAME_LENGTH);
+            cantidades[n_distintas] = orders[i].quantity;
+            n_distintas++;
+        }
+    }
+
+    // Buscar índice de la pizza más vendida
+    for (int i = 0; i < n_distintas; i++) {
+        if (cantidades[i] > max_cantidad) {
+            max_cantidad = cantidades[i];
+            index_mas_vendida = i;
+        }
+    }
+
+    // Buscar el nombre completo de la pizza más vendida
+    for (int i = 0; i < *size; i++) {
+        if (strcmp(orders[i].pizza_name_id, nombres[index_mas_vendida]) == 0) {
+            char* resultado = malloc(strlen(orders[i].pizza_name) + 1);
+            strcpy(resultado, orders[i].pizza_name);
+            return resultado;
+        }
+    }
+
+    return NULL;
+}
+
+
+//leemos CSV que puede o no estar entre comillas
 char* leer_campo_csv(char** cursor) {
     static char buffer[MAX_LINE_LENGTH];
     char* ptr = buffer;
@@ -79,7 +126,7 @@ int main() {
     char line[MAX_LINE_LENGTH];
     int count = 0;
 
-    // Saltamos encabezado
+    //saltamos primera linea
     fgets(line, sizeof(line), file);
 
     while (fgets(line, sizeof(line), file) && count < MAX_ORDERS) {
@@ -103,7 +150,7 @@ int main() {
 
         orders[count++] = temp;
 
-        // DEBUG: Mostrar datos
+        //print de depuracion, lo podemos eliminar al ver que este todo bien
         printf("Pedido %d:\n", count);
         printf("  Pizza ID: %d\n", temp.pizza_id);
         printf("  Order ID: %d\n", temp.order_id);
@@ -121,6 +168,13 @@ int main() {
     }
 
     printf("Se procesaron %d pedidos correctamente.\n", count);
+    char* mas_vendida = pms(&count, orders);
+    if (mas_vendida) {
+       printf("Pizza más vendida: %s\n", mas_vendida);
+       free(mas_vendida); // liberar memoria reservada por pms
+}
+
+
 
     free(orders);
     fclose(file);
