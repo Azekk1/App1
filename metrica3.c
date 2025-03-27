@@ -31,20 +31,18 @@ typedef struct {
 } VentaCategoria;
 
 int main(int argc, char *argv[]) {
-    // Proporcionar un archivo como argumento directamente en el terminal
-    if (argc < 2) {
-        printf("Uso: %s <archivo_csv>\n", argv[0]);
+    // Verificación de argumentos
+    if (argc < 3) {
+        printf("Uso: %s <archivo_csv> <comando1> [comando2] ...\n", argv[0]);
         return 1;
     }
 
-    // Se abre el archivo csv especificado
+    // Abrir archivo CSV
     FILE *archivo = fopen(argv[1], "r");
     if (archivo == NULL) {
         printf("Error al abrir el archivo: %s\n", argv[1]);
         return 1;
     }
-
-    printf("Archivo %s abierto correctamente.\n", argv[1]);
 
     char *linea = NULL;
     size_t len = 0;
@@ -61,6 +59,7 @@ int main(int argc, char *argv[]) {
     int totalCategorias = 0;
     int totalOrdenes = 0, totalPizzasVendidas = 0;
 
+    // Leer archivo línea por línea
     while ((read = getline(&linea, &len, archivo)) != -1) {
         if (primeraLinea) { 
             primeraLinea = 0;
@@ -152,53 +151,43 @@ int main(int argc, char *argv[]) {
             totalCategorias++;
         }
         ventasPorCategoria[categoriaIndex].cantidad_vendida += cantidad;
-
-        totalOrdenes++;
-        totalPizzasVendidas += cantidad;
     }
-    
-    char comando[10];
-    printf("Ingrese un comando (pms, pls, dms, dls, dmsp, dlsp, apo, apd, ims, hp): ");
-    scanf("%s", comando);
 
-    // Comando pms - Pizza más vendida
-    // Comando pms - Pizza más vendida
-if (strcmp(comando, "pms") == 0) {
-    VentaPizza masVendida = ventasPorPizza[0];
-    for (int i = 1; i < totalPizzas; i++) {
-        if (ventasPorPizza[i].cantidad_vendida > masVendida.cantidad_vendida) {
-            masVendida = ventasPorPizza[i];
-        }
-    }
-    printf("Pizza más vendida: %s con %d ventas", masVendida.nombre, masVendida.cantidad_vendida);
-}
-    // Comando pls - Pizza menos vendida
-    else if (strcmp(comando, "pls") == 0) {
-        VentaPizza menosVendida = ventasPorPizza[0];
-        for (int i = 1; i < totalPizzas; i++) {
-            if (ventasPorPizza[i].cantidad_vendida < menosVendida.cantidad_vendida) {
-                menosVendida = ventasPorPizza[i];
+    // Procesar comandos desde la línea de argumentos
+    for (int j = 2; j < argc; j++) {
+        if (strcmp(argv[j], "pms") == 0) {
+            VentaPizza masVendida = ventasPorPizza[0];
+            for (int i = 1; i < totalPizzas; i++) {
+                if (ventasPorPizza[i].cantidad_vendida > masVendida.cantidad_vendida) {
+                    masVendida = ventasPorPizza[i];
+                }
+            }
+            printf("Pizza más vendida: %s con %d ventas\n", masVendida.nombre, masVendida.cantidad_vendida);
+        } 
+        else if (strcmp(argv[j], "pls") == 0) {
+            VentaPizza menosVendida = ventasPorPizza[0];
+            for (int i = 1; i < totalPizzas; i++) {
+                if (ventasPorPizza[i].cantidad_vendida < menosVendida.cantidad_vendida) {
+                    menosVendida = ventasPorPizza[i];
+                }
+            }
+            printf("Pizza menos vendida: %s con %d ventas\n", menosVendida.nombre, menosVendida.cantidad_vendida);
+        } 
+        else if (strcmp(argv[j], "ims") == 0) {
+            VentaIngrediente masVendidoIngrediente = ventasPorIngrediente[0];
+            for (int i = 1; i < totalIngredientes; i++) {
+                if (ventasPorIngrediente[i].cantidad_vendida > masVendidoIngrediente.cantidad_vendida) {
+                    masVendidoIngrediente = ventasPorIngrediente[i];
+                }
+            }
+            printf("Ingrediente más vendido: %s con %d ventas\n", masVendidoIngrediente.ingrediente, masVendidoIngrediente.cantidad_vendida);
+        } 
+        else if (strcmp(argv[j], "hp") == 0) {
+            for (int i = 0; i < totalCategorias; i++) {
+                printf("Categoría %s: %d pizzas vendidas\n", ventasPorCategoria[i].categoria, ventasPorCategoria[i].cantidad_vendida);
             }
         }
-        printf("Pizza menos vendida: %s con %d ventas\n", menosVendida.nombre, menosVendida.cantidad_vendida);
     }
-    // Comando ims - Ingrediente más vendido
-    else if (strcmp(comando, "ims") == 0) {
-        VentaIngrediente masVendidoIngrediente = ventasPorIngrediente[0];
-        for (int i = 1; i < totalIngredientes; i++) {
-            if (ventasPorIngrediente[i].cantidad_vendida > masVendidoIngrediente.cantidad_vendida) {
-                masVendidoIngrediente = ventasPorIngrediente[i];
-            }
-        }
-        printf("Ingrediente más vendido: %s con %d ventas\n", masVendidoIngrediente.ingrediente, masVendidoIngrediente.cantidad_vendida);
-    }
-    // Comando hp - Cantidad de pizzas por categoría vendidas
-    else if (strcmp(comando, "hp") == 0) {
-        for (int i = 0; i < totalCategorias; i++) {
-            printf("Categoría %s: %d pizzas vendidas\n", ventasPorCategoria[i].categoria, ventasPorCategoria[i].cantidad_vendida);
-        }
-    }
-    // Comandos restantes como dms, dls, dmsp, dlsp, apo, apd...
 
     free(linea);
     fclose(archivo);
