@@ -1,213 +1,182 @@
-//agregamos librerias
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 
-//longitudes maximas 
 #define MAX_LINE_LENGTH 1024
+#define MAX_NAME_LENGTH 100
 #define MAX_DATE_LENGTH 20
 #define MAX_TIME_LENGTH 20
-#define MAX_NAME_LENGTH 100  //incluye pizza_name pizza_size y pizza_category
 #define MAX_INGREDIENTS_LENGTH 200
-#define MAX_ORDERS 10000 //maximo de pedidos que podemos manejar
+#define MAX_ORDERS 10000
 
-//definimos estructura 
 struct order {
-    int pizza_id;                        //ID de la pizza
-    int order_id;                        //ID de la orden
-    int pizza_name_id;                   //ID del nombre de la pizza
-    int quantity;                        //cantidad de pizzas en la orden
-    char order_date[MAX_DATE_LENGTH];      //fecha del pedido (YYYY-MM-DD)
-    char order_time[MAX_TIME_LENGTH];        //hora del pedido (HH:MM:SS)
-    float unit_price;                       //precio unitario de la pizza
-    float total_price;                     //precio total (quantity * unit_price)
-    char pizza_size[MAX_NAME_LENGTH];      //tamaño de la pizza (S, M, L, XL)
-    char pizza_category[MAX_NAME_LENGTH];  //categoría de la pizza (Clásica, Vegetariana, etc.)
-    char pizza_ingredients[MAX_INGREDIENTS_LENGTH];  //ingredientes de la pizza
-    char pizza_name[MAX_NAME_LENGTH];   //nombre completo de la pizza
+    int pizza_id;
+    int order_id;
+    char pizza_name_id[MAX_NAME_LENGTH];
+    int quantity;
+    char order_date[MAX_DATE_LENGTH];
+    char order_time[MAX_TIME_LENGTH];
+    float unit_price;
+    float total_price;
+    char pizza_size[MAX_NAME_LENGTH];
+    char pizza_category[MAX_NAME_LENGTH];
+    char pizza_ingredients[MAX_INGREDIENTS_LENGTH];
+    char pizza_name[MAX_NAME_LENGTH];
 };
 
-//funcion para dividir el CSV y almacenar los datos en la estructura order
-void parse_csv(FILE *csv_file, struct order *orders, int *order_count) {
-    char line[MAX_LINE_LENGTH];
-    while (fgets(line, sizeof(line), csv_file)) {
-        // Separar los valores por coma (",")
-        char *token = strtok(line, ",");
-        
-        // Parsear los valores y asignarlos a la estructura `order`
-        orders[*order_count].pizza_id = atoi(token); // pizza_id
-        token = strtok(NULL, ",");
-        
-        orders[*order_count].order_id = atoi(token); // order_id
-        token = strtok(NULL, ",");
-        
-        orders[*order_count].pizza_name_id = atoi(token); // pizza_name_id
-        token = strtok(NULL, ",");
-        
-        orders[*order_count].quantity = atoi(token); // quantity
-        token = strtok(NULL, ",");
-        
-        strcpy(orders[*order_count].order_date, token); // order_date
-        token = strtok(NULL, ",");
-        
-        strcpy(orders[*order_count].order_time, token); // order_time
-        token = strtok(NULL, ",");
-        
-        orders[*order_count].unit_price = atof(token); // unit_price
-        token = strtok(NULL, ",");
-        
-        orders[*order_count].total_price = atof(token); // total_price
-        token = strtok(NULL, ",");
-        
-        strcpy(orders[*order_count].pizza_size, token); // pizza_size
-        token = strtok(NULL, ",");
-        
-        strcpy(orders[*order_count].pizza_category, token); // pizza_category
-        token = strtok(NULL, ",");
-        
-        strcpy(orders[*order_count].pizza_ingredients, token); // pizza_ingredients
-        token = strtok(NULL, """");
-        
-        strcpy(orders[*order_count].pizza_name, token); // pizza_name
-        
-        // Aumentar el contador de órdenes
-        (*order_count)++;
+void limpiar_entrada(char* str) {
+    size_t len = strlen(str);
+    if (len > 0 && str[len - 1] == '\n') {
+        str[len - 1] = '\0';
     }
 }
 
-//definicion de funcion para cada metrica
-// Función para obtener la pizza más vendida
-char* pizza_mas_vendida(int *size, struct order *orders) {
-    static char result[100];
-    int max_sales = 0;
-    char pizza_name[50];
+//pizza mas vendida - pms
+char* pms(int *size, struct order *orders) {
+    int max_cantidad = 0;
+    int index_mas_vendida = -1;
+
+    char nombres[MAX_ORDERS][MAX_NAME_LENGTH];
+    int cantidades[MAX_ORDERS];
+    int n_distintas = 0;
+
     for (int i = 0; i < *size; i++) {
-        if (orders[i].quantity > max_sales) {
-            max_sales = orders[i].quantity;
-            strcpy(pizza_name, orders[i].pizza_name);
+        int encontrado = 0;
+        for (int j = 0; j < n_distintas; j++) {
+            if (strcmp(nombres[j], orders[i].pizza_name_id) == 0) {
+                cantidades[j] += orders[i].quantity;
+                encontrado = 1;
+                break;
+            }
+        }
+
+        if (!encontrado) {
+            strncpy(nombres[n_distintas], orders[i].pizza_name_id, MAX_NAME_LENGTH);
+            cantidades[n_distintas] = orders[i].quantity;
+            n_distintas++;
         }
     }
-    sprintf(result, "Pizza más vendida: %s", pizza_name);
-    return result;
+
+    // Buscar índice de la pizza más vendida
+    for (int i = 0; i < n_distintas; i++) {
+        if (cantidades[i] > max_cantidad) {
+            max_cantidad = cantidades[i];
+            index_mas_vendida = i;
+        }
+    }
+
+    // Buscar el nombre completo de la pizza más vendida
+    for (int i = 0; i < *size; i++) {
+        if (strcmp(orders[i].pizza_name_id, nombres[index_mas_vendida]) == 0) {
+            char* resultado = malloc(strlen(orders[i].pizza_name) + 1);
+            strcpy(resultado, orders[i].pizza_name);
+            return resultado;
+        }
+    }
+
+    return NULL;
 }
 
 
-//funcion para pizza menos vendida
-char* pizza_menos_vendida(int *size, struct order *orders) {
-    // Implementación para encontrar la pizza menos vendida
-    // Devolver el nombre de la pizza menos vendida
+//leemos CSV que puede o no estar entre comillas
+char* leer_campo_csv(char** cursor) {
+    static char buffer[MAX_LINE_LENGTH];
+    char* ptr = buffer;
+    int entre_comillas = 0;
+
+    if (**cursor == '"') {
+        entre_comillas = 1;
+        (*cursor)++;
+    }
+
+    while (**cursor) {
+        if (entre_comillas) {
+            if (**cursor == '"' && *((*cursor)+1) == ',') {
+                (*cursor) += 2;  // Saltar comilla y coma
+                break;
+            }
+        } else {
+            if (**cursor == ',') {
+                (*cursor)++;
+                break;
+            }
+        }
+
+        *ptr++ = *(*cursor)++;
+    }
+
+    *ptr = '\0';
+    return buffer;
 }
 
-// Función para obtener la fecha con más ventas en términos de dinero
-char* fecha_mas_ventas_dinero(int *size, struct order *orders) {
-    // Implementación para encontrar la fecha con más ventas en dinero
-    // Devolver la fecha con la cantidad de dinero recaudado
-}
-
-// Función para obtener la fecha con menos ventas en términos de dinero
-char* fecha_menos_ventas_dinero(int *size, struct order *orders) {
-    // Implementación para encontrar la fecha con menos ventas en dinero
-    // Devolver la fecha con la cantidad de dinero recaudado
-}
-
-// Función para obtener la fecha con más ventas en términos de cantidad de pizzas
-char* fecha_mas_ventas_pizzas(int *size, struct order *orders) {
-    // Implementación para encontrar la fecha con más ventas en cantidad de pizzas
-    // Devolver la fecha con la cantidad de pizzas vendidas
-}
-
-// Función para obtener la fecha con menos ventas en términos de cantidad de pizzas
-char* fecha_menos_ventas_pizzas(int *size, struct order *orders) {
-    // Implementación para encontrar la fecha con menos ventas en cantidad de pizzas
-    // Devolver la fecha con la cantidad de pizzas vendidas
-}
-
-// Función para obtener el promedio de pizzas por orden
-char* promedio_pizzas_por_orden(int *size, struct order *orders) {
-    // Implementación para calcular el promedio de pizzas por orden
-    // Devolver el promedio como una cadena formateada
-}
-
-// Función para obtener el promedio de pizzas por día
-char* promedio_pizzas_por_dia(int *size, struct order *orders) {
-    // Implementación para calcular el promedio de pizzas por día
-    // Devolver el promedio como una cadena formateada
-}
-
-// Función para obtener el ingrediente más vendido
-char* ingrediente_mas_vendido(int *size, struct order *orders) {
-    // Implementación para encontrar el ingrediente más vendido
-    // Devolver el nombre del ingrediente más vendido
-}
-
-// Función para obtener la cantidad de pizzas por categoría vendidas
-char* cantidad_pizzas_por_categoria(int *size, struct order *orders) {
-    // Implementación para contar la cantidad de pizzas por categoría vendidas
-    // Devolver las cantidades por categoría como una cadena formateada
-}
-
-//arreglo de punteros a funciones para cada métrica, llamamos en funcion de la metrica solicitada 
-char* (*metrics[])(int *, struct order *) = {
-    pizza_mas_vendida,
-    pizza_menos_vendida,
-    fecha_mas_ventas_dinero,
-    fecha_menos_ventas_dinero,
-    fecha_mas_ventas_pizzas,
-    fecha_menos_ventas_pizzas,
-    promedio_pizzas_por_orden,
-    promedio_pizzas_por_dia,
-    ingrediente_mas_vendido,
-    cantidad_pizzas_por_categoria
-};
-
-
-//FUNCION PRINCIPAL lee CSV y aplica metricas
-//argc ----> cantidad de argimentos
-//argv ----> arreglo de argumentos en foemato txt
-int main(int argc, char *argv[]) {
-    //si no hay argumentos  suficientes mostramos error
-    if (argc < 3) {
-        fprintf(stderr, "Uso: %s <archivo_csv> <metrica1> <metrica2> ...\n", argv[0]);
+int main() {
+    FILE *file = fopen("ventas.csv", "r");
+    if (!file) {
+        perror("Error al abrir el archivo");
         return 1;
     }
 
-
-    //ABRIMOS CSV
-    char *csv_filename = argv[1];
-    FILE *csv_file = fopen(csv_filename, "r");
-    if (!csv_file) {
-        fprintf(stderr, "No se pudo abrir el archivo %s\n", csv_filename);
+    struct order* orders = malloc(sizeof(struct order) * MAX_ORDERS);
+    if (!orders) {
+        perror("Error al asignar memoria");
+        fclose(file);
         return 1;
     }
 
-    //leemos ordenes del csv 
-    char line[MAX_LINE_LENGTH];  //almacenamos temporalmente cad alinea del csv
-    struct order orders[MAX_ORDERS];  //asumimos un maximo de ordenes
-    int order_count = 0;
+    char line[MAX_LINE_LENGTH];
+    int count = 0;
 
-    // Llamamos a la función de parseo
-    parse_csv(csv_file, orders, &order_count);
+    //saltamos primera linea
+    fgets(line, sizeof(line), file);
 
+    while (fgets(line, sizeof(line), file) && count < MAX_ORDERS) {
+        limpiar_entrada(line);
+        struct order temp;
 
-    //fgets lee cada linea
-    while (fgets(line, sizeof(line), csv_file)) {
-        //implementacion para leer cada linea para separar los valores y almacenar los datos en la estructura order
-        order_count++;
+        char* cursor = line;
+
+        temp.pizza_id = atoi(leer_campo_csv(&cursor));
+        temp.order_id = atoi(leer_campo_csv(&cursor));
+        strncpy(temp.pizza_name_id, leer_campo_csv(&cursor), MAX_NAME_LENGTH);
+        temp.quantity = atoi(leer_campo_csv(&cursor));
+        strncpy(temp.order_date, leer_campo_csv(&cursor), MAX_DATE_LENGTH);
+        strncpy(temp.order_time, leer_campo_csv(&cursor), MAX_TIME_LENGTH);
+        temp.unit_price = atof(leer_campo_csv(&cursor));
+        temp.total_price = atof(leer_campo_csv(&cursor));
+        strncpy(temp.pizza_size, leer_campo_csv(&cursor), MAX_NAME_LENGTH);
+        strncpy(temp.pizza_category, leer_campo_csv(&cursor), MAX_NAME_LENGTH);
+        strncpy(temp.pizza_ingredients, leer_campo_csv(&cursor), MAX_INGREDIENTS_LENGTH);
+        strncpy(temp.pizza_name, leer_campo_csv(&cursor), MAX_NAME_LENGTH);
+
+        orders[count++] = temp;
+
+        //print de depuracion, lo podemos eliminar al ver que este todo bien
+        printf("Pedido %d:\n", count);
+        printf("  Pizza ID: %d\n", temp.pizza_id);
+        printf("  Order ID: %d\n", temp.order_id);
+        printf("  Pizza Name ID: %s\n", temp.pizza_name_id);
+        printf("  Cantidad: %d\n", temp.quantity);
+        printf("  Fecha: %s\n", temp.order_date);
+        printf("  Hora: %s\n", temp.order_time);
+        printf("  Precio unitario: %.2f\n", temp.unit_price);
+        printf("  Precio total: %.2f\n", temp.total_price);
+        printf("  Tamaño: %s\n", temp.pizza_size);
+        printf("  Categoría: %s\n", temp.pizza_category);
+        printf("  Ingredientes: %s\n", temp.pizza_ingredients);
+        printf("  Nombre pizza: %s\n", temp.pizza_name);
+        printf("-------------------------------------\n");
     }
 
-    
+    printf("Se procesaron %d pedidos correctamente.\n", count);
+    char* mas_vendida = pms(&count, orders);
+    if (mas_vendida) {
+       printf("Pizza más vendida: %s\n", mas_vendida);
+       free(mas_vendida); // liberar memoria reservada por pms
+}
 
-    //calculamos y mostramos las metricas pedidas
-    int num_metrics = argc - 2;
-    for (int i = 0; i < num_metrics; i++) {
-        int size;
-        char *result = metrics[i](&size, orders);
-        printf("%s\n", result);
-    }
 
-    
 
+    free(orders);
+    fclose(file);
     return 0;
 }
-
