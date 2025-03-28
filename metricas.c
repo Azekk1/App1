@@ -337,6 +337,40 @@ char* apo(int *size, struct order *orders) {
     return resultado;
 }
 
+// PROMEDIO PIZZAS POR DIA (cantidad de pizzas/fechas)
+char* apd(int *size, struct order *orders) {
+    int total_pizzas = 0;
+    char fechas_unicas[MAX_ORDERS][MAX_DATE_LENGTH];
+    int total_fechas = 0;
+
+    for (int i = 0; i < *size; i++) {
+        total_pizzas += orders[i].quantity;
+
+        int ya_esta = 0;
+        for (int j = 0; j < total_fechas; j++) {
+            if (strcmp(fechas_unicas[j], orders[i].order_date) == 0) {
+                ya_esta = 1;
+                break;
+            }
+        }
+
+        if (!ya_esta) {
+            strncpy(fechas_unicas[total_fechas++], orders[i].order_date, MAX_DATE_LENGTH);
+        }
+    }
+
+    if (total_fechas == 0) return NULL;
+
+    float promedio = (float) total_pizzas / total_fechas;
+
+    char* resultado = malloc(100);
+    if (resultado) {
+        snprintf(resultado, 100, "Promedio de pizzas por día: %.2f", promedio);
+    }
+
+    return resultado;
+}
+
 
 
 
@@ -465,6 +499,14 @@ int main() {
         printf("%s\n", promedio_pizzas);
         free(promedio_pizzas);
     }
+
+    //promedio pizzas por dia
+    char* promedio_por_dia = apd(&count, orders);
+    if (promedio_por_dia) {
+        printf("%s\n", promedio_por_dia);
+        free(promedio_por_dia);
+    }
+
 
     
 
