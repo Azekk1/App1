@@ -429,6 +429,42 @@ char* ims(int *size, struct order *orders) {
 
 
 //CANTIDAD DE PIZZAS POR CATEGORIA VENDIDAS
+char* hp(int *size, struct order *orders) {
+    char categorias[MAX_ORDERS][MAX_NAME_LENGTH];
+    int cantidades[MAX_ORDERS];
+    int n_categorias = 0;
+
+    for (int i = 0; i < *size; i++) {
+        int encontrada = 0;
+        for (int j = 0; j < n_categorias; j++) {
+            if (strcmp(categorias[j], orders[i].pizza_category) == 0) {
+                cantidades[j] += orders[i].quantity;
+                encontrada = 1;
+                break;
+            }
+        }
+
+        if (!encontrada) {
+            strncpy(categorias[n_categorias], orders[i].pizza_category, MAX_NAME_LENGTH);
+            cantidades[n_categorias] = orders[i].quantity;
+            n_categorias++;
+        }
+    }
+
+    // Construir el resultado en un string
+    char* resultado = malloc(n_categorias * 50);  // asumimos hasta 50 caracteres por línea
+    if (!resultado) return NULL;
+    resultado[0] = '\0';  // inicializar cadena vacía
+
+    for (int i = 0; i < n_categorias; i++) {
+        char linea[150];
+        snprintf(linea, sizeof(linea), "%s: %d\n", categorias[i], cantidades[i]);
+        strcat(resultado, linea);
+    }
+
+    return resultado;
+}
+
 
 
 
@@ -572,11 +608,12 @@ int main() {
         free(ingrediente_mas_vendido);
     }
 
-
-
-
-    
-
+    //cantidad de pizzas por categoria
+    char* pizzas_por_categoria = hp(&count, orders);
+    if (pizzas_por_categoria) {
+        printf("Cantidad de pizzas por categoría:\n%s", pizzas_por_categoria);
+        free(pizzas_por_categoria);
+    }
 
     free(orders);
     fclose(file);
