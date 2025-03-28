@@ -371,6 +371,64 @@ char* apd(int *size, struct order *orders) {
     return resultado;
 }
 
+//INGGREDIENTE MAS VENDIDO
+char* ims(int *size, struct order *orders) {
+    char ingredientes[MAX_ORDERS * 5][MAX_NAME_LENGTH];
+    int cantidades[MAX_ORDERS * 5];
+    int n_ingredientes = 0;
+
+    for (int i = 0; i < *size; i++) {
+        char ingredientes_local[MAX_INGREDIENTS_LENGTH];
+        strncpy(ingredientes_local, orders[i].pizza_ingredients, MAX_INGREDIENTS_LENGTH);
+
+        // Separar por coma
+        char* token = strtok(ingredientes_local, ",");
+        while (token != NULL) {
+            // Limpiar espacios al inicio
+            while (*token == ' ') token++;
+
+            int encontrado = 0;
+            for (int j = 0; j < n_ingredientes; j++) {
+                if (strcmp(ingredientes[j], token) == 0) {
+                    cantidades[j] += orders[i].quantity;
+                    encontrado = 1;
+                    break;
+                }
+            }
+
+            if (!encontrado) {
+                strncpy(ingredientes[n_ingredientes], token, MAX_NAME_LENGTH);
+                cantidades[n_ingredientes] = orders[i].quantity;
+                n_ingredientes++;
+            }
+
+            token = strtok(NULL, ",");
+        }
+    }
+
+    // Buscar el ingrediente más vendido
+    int max_cantidad = 0;
+    int index_max = -1;
+
+    for (int i = 0; i < n_ingredientes; i++) {
+        if (cantidades[i] > max_cantidad) {
+            max_cantidad = cantidades[i];
+            index_max = i;
+        }
+    }
+
+    if (index_max == -1) return NULL;
+
+    char* resultado = malloc(strlen(ingredientes[index_max]) + 1);
+    if (resultado) {
+        strcpy(resultado, ingredientes[index_max]);
+    }
+
+    return resultado;
+}
+
+
+//CANTIDAD DE PIZZAS POR CATEGORIA VENDIDAS
 
 
 
@@ -506,6 +564,15 @@ int main() {
         printf("%s\n", promedio_por_dia);
         free(promedio_por_dia);
     }
+
+    //ingrediente mas vendido
+    char* ingrediente_mas_vendido = ims(&count, orders);
+    if (ingrediente_mas_vendido) {
+        printf("Ingrediente más vendido: %s\n", ingrediente_mas_vendido);
+        free(ingrediente_mas_vendido);
+    }
+
+
 
 
     
