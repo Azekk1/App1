@@ -258,6 +258,52 @@ char* dmsp(int *size, struct order *orders) {
     return resultado;
 }
 
+//FECHA CON MENOS VENTAS EN CANTIDAD
+char* dlsp(int *size, struct order *orders) {
+    char fechas[MAX_ORDERS][MAX_DATE_LENGTH];
+    int cantidades[MAX_ORDERS];
+    int n_fechas = 0;
+
+    // Agrupar cantidades por fecha
+    for (int i = 0; i < *size; i++) {
+        int encontrada = 0;
+        for (int j = 0; j < n_fechas; j++) {
+            if (strcmp(fechas[j], orders[i].order_date) == 0) {
+                cantidades[j] += orders[i].quantity;
+                encontrada = 1;
+                break;
+            }
+        }
+        if (!encontrada) {
+            strncpy(fechas[n_fechas], orders[i].order_date, MAX_DATE_LENGTH);
+            cantidades[n_fechas] = orders[i].quantity;
+            n_fechas++;
+        }
+    }
+
+    if (n_fechas == 0) return NULL;
+
+    // Buscar la fecha con menos pizzas
+    int min_pizzas = cantidades[0];
+    int index_min = 0;
+
+    for (int i = 1; i < n_fechas; i++) {
+        if (cantidades[i] < min_pizzas) {
+            min_pizzas = cantidades[i];
+            index_min = i;
+        }
+    }
+
+    // Formatear resultado
+    char* resultado = malloc(100);
+    if (resultado) {
+        snprintf(resultado, 100, "%s - %d pizzas", fechas[index_min], min_pizzas);
+    }
+
+    return resultado;
+}
+
+
 
 //leemos CSV que puede o no estar entre comillas
 char* leer_campo_csv(char** cursor) {
@@ -370,6 +416,14 @@ int main() {
       printf("Fecha con más pizzas vendidas: %s\n", fecha_mas_pizzas);
       free(fecha_mas_pizzas);
     }
+
+    //fecha con menos ventas en cantidad
+    char* fecha_menos_pizzas = dlsp(&count, orders);
+    if (fecha_menos_pizzas) {
+        printf("Fecha con menos pizzas vendidas: %s\n", fecha_menos_pizzas);
+        free(fecha_menos_pizzas);
+    }
+
 
     free(orders);
     fclose(file);
