@@ -303,6 +303,41 @@ char* dlsp(int *size, struct order *orders) {
     return resultado;
 }
 
+//PROMEDIO DE PIZZAS POR ORDEN
+char* apo(int *size, struct order *orders) {
+    int total_pizzas = 0;
+    int ordenes_unicas[MAX_ORDERS];
+    int total_ordenes = 0;
+
+    for (int i = 0; i < *size; i++) {
+        total_pizzas += orders[i].quantity;
+
+        int ya_registrada = 0;
+        for (int j = 0; j < total_ordenes; j++) {
+            if (ordenes_unicas[j] == orders[i].order_id) {
+                ya_registrada = 1;
+                break;
+            }
+        }
+
+        if (!ya_registrada) {
+            ordenes_unicas[total_ordenes++] = orders[i].order_id;
+        }
+    }
+
+    if (total_ordenes == 0) return NULL;
+
+    float promedio = (float) total_pizzas / total_ordenes;
+
+    char* resultado = malloc(100);
+    if (resultado) {
+        snprintf(resultado, 100, "Promedio de pizzas por orden: %.2f", promedio);
+    }
+
+    return resultado;
+}
+
+
 
 
 //leemos CSV que puede o no estar entre comillas
@@ -423,6 +458,15 @@ int main() {
         printf("Fecha con menos pizzas vendidas: %s\n", fecha_menos_pizzas);
         free(fecha_menos_pizzas);
     }
+
+    //promedio de pizzas por orden 
+    char* promedio_pizzas = apo(&count, orders);
+    if (promedio_pizzas) {
+        printf("%s\n", promedio_pizzas);
+        free(promedio_pizzas);
+    }
+
+    
 
 
     free(orders);
