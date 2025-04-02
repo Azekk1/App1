@@ -124,7 +124,7 @@ char* pls(int *size, struct order *orders) {
     return NULL;
 }
 
-//FECHA CON MAS VENTAS $$$$$
+//FECHA CON MAS VENTAS DINERO RECAUDADO
 char* dms(int *size, struct order *orders) {
     char fechas[MAX_ORDERS][MAX_DATE_LENGTH];
     float montos[MAX_ORDERS];
@@ -168,7 +168,7 @@ char* dms(int *size, struct order *orders) {
     return resultado;
 }
 
-//FECHA CON MENOS VENTAS $$$$
+//FECHA CON MENOS VENTAS EN DINERO
 char* dls(int *size, struct order *orders) {
     char fechas[MAX_ORDERS][MAX_DATE_LENGTH];
     float montos[MAX_ORDERS];
