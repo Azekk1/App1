@@ -31,7 +31,7 @@ void limpiar_entrada(char* str) {
     }
 }
 
-//CALCULAMOS PIZZA MAS VENDIDA - pms
+//CREANDO CALCULO PIZZA MAS VENDIDA - pms
 char* pms(int *size, struct order *orders) {
     int max_cantidad = 0;
     int index_mas_vendida = -1;
