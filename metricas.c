@@ -193,7 +193,7 @@ char* dls(int *size, struct order *orders) {
 
     if (n_fechas == 0) return NULL;
 
-    // Buscar la fecha con menor recaudación
+    // Buscar la fecha en el registro con menor recaudación
     float min_monto = montos[0];
     int index_min = 0;
 
