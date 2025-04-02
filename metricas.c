@@ -31,7 +31,7 @@ void limpiar_entrada(char* str) {
     }
 }
 
-//CALCULAMOS PIZZA MAS VENDIA - pms
+//CALCULAMOS PIZZA MAS VENDIDA - pms
 char* pms(int *size, struct order *orders) {
     int max_cantidad = 0;
     int index_mas_vendida = -1;
@@ -499,10 +499,18 @@ char* leer_campo_csv(char** cursor) {
     return buffer;
 }
 
-int main() {
-    FILE *file = fopen("ventas.csv", "r");
-    if (!file) {
-        perror("Error al abrir el archivo");
+int main(int argc, char *argv[]) {
+
+    // Verifica si se cumplen los requisitos para correr el código en el terminal
+    if (argc < 3) {
+        printf("Uso: %s <archivo_csv> <comando1> [comando2] ...\n", argv[0]);
+        return 1;
+    }
+
+    // Abrir archivo CSV especificado en el terminal
+    FILE *file = fopen(argv[1], "r");
+    if (file == NULL) {
+        printf("Error al abrir el archivo: %s\n", argv[1]);
         return 1;
     }
 
@@ -545,76 +553,89 @@ int main() {
 
     printf("Se procesaron %d pedidos correctamente.\n", count);
 
-    //entrega pizza mas vendida
-    char* mas_vendida = pms(&count, orders);
-    if (mas_vendida) {
-       printf("Pizza más vendida: %s\n", mas_vendida);
-       free(mas_vendida); // liberar memoria reservada por pms  
+    // Comandos que se desean correr desde el terminal
+    for (int j = 2; j < argc; j++) {
+        //entrega pizza mas vendida
+        if (strcmp(argv[j], "pms") == 0) {
+            char* mas_vendida = pms(&count, orders);
+            if (mas_vendida) {
+            printf("Pizza más vendida: %s\n", mas_vendida);
+            free(mas_vendida); // liberar memoria reservada por pms  
+            }
+        }
+        //entrega pizza menos vendida 
+        if (strcmp(argv[j], "pls") == 0) {
+            char* menos_vendida = pls(&count, orders);
+            if (menos_vendida) {
+            printf("Pizza menos vendida: %s\n", menos_vendida);
+            free(menos_vendida);
+            }
+        }
+        //fecha con mas ventas $$$$
+        if (strcmp(argv[j], "dms") == 0) {
+            char* fecha_mayor_ventas = dms(&count, orders);
+            if (fecha_mayor_ventas) {
+            printf("Día con más ventas: %s\n", fecha_mayor_ventas);
+            free(fecha_mayor_ventas);
+            }
+        }
+        //fecha con menos ventas $$$
+        if (strcmp(argv[j], "dls") == 0){
+            char* fecha_menor_ventas = dls(&count, orders);
+            if (fecha_menor_ventas) {
+            printf("Día con menos ventas: %s\n", fecha_menor_ventas);
+            free(fecha_menor_ventas);   
+            }
+        }
+        //fecha con mas ventas en cantidad
+        if (strcmp(argv[j], "dmsp") == 0){
+            char* fecha_mas_pizzas = dmsp(&count, orders);
+            if (fecha_mas_pizzas) {
+            printf("Fecha con más pizzas vendidas: %s\n", fecha_mas_pizzas);
+            free(fecha_mas_pizzas);
+            }
+        }
+        //fecha con menos ventas en cantidad
+        if (strcmp(argv[j], "dlsp") == 0){
+            char* fecha_menos_pizzas = dlsp(&count, orders);
+            if (fecha_menos_pizzas) {
+                printf("Fecha con menos pizzas vendidas: %s\n", fecha_menos_pizzas);
+                free(fecha_menos_pizzas);
+            }
+        }
+        //promedio de pizzas por orden
+        if (strcmp(argv[j], "apo") == 0){
+            char* promedio_pizzas = apo(&count, orders);
+            if (promedio_pizzas) {
+                printf("%s\n", promedio_pizzas);
+                free(promedio_pizzas);
+            }
+        }
+        //promedio pizzas por dia
+        if (strcmp(argv[j], "apd") == 0){
+            char* promedio_por_dia = apd(&count, orders);
+            if (promedio_por_dia) {
+                printf("%s\n", promedio_por_dia);
+                free(promedio_por_dia);
+            }
+        }
+        //ingrediente mas vendido
+        if (strcmp(argv[j], "ims") == 0){
+            char* ingrediente_mas_vendido = ims(&count, orders);
+            if (ingrediente_mas_vendido) {
+                printf("Ingrediente más vendido: %s\n", ingrediente_mas_vendido);
+                free(ingrediente_mas_vendido);
+            }
+        }
+        //cantidad de pizzas por categoria
+        if (strcmp(argv[j], "hp") == 0){
+            char* pizzas_por_categoria = hp(&count, orders);
+            if (pizzas_por_categoria) {
+                printf("Cantidad de pizzas por categoría:\n%s", pizzas_por_categoria);
+                free(pizzas_por_categoria);
+            }
+        }
     }
-
-    //entrega pizza menos vendida 
-    char* menos_vendida = pls(&count, orders);
-    if (menos_vendida) {
-       printf("Pizza menos vendida: %s\n", menos_vendida);
-       free(menos_vendida);
-    }
-
-    //fecha con mas ventas $$$$
-    char* fecha_mayor_ventas = dms(&count, orders);
-    if (fecha_mayor_ventas) {
-       printf("Día con más ventas: %s\n", fecha_mayor_ventas);
-       free(fecha_mayor_ventas);
-    }
-
-    //fecha con menos ventas $$$
-    char* fecha_menor_ventas = dls(&count, orders);
-    if (fecha_menor_ventas) {
-       printf("Día con menos ventas: %s\n", fecha_menor_ventas);
-       free(fecha_menor_ventas);   
-    }
-
-    //fecha con mas ventas en cantidad
-    char* fecha_mas_pizzas = dmsp(&count, orders);
-    if (fecha_mas_pizzas) {
-      printf("Fecha con más pizzas vendidas: %s\n", fecha_mas_pizzas);
-      free(fecha_mas_pizzas);
-    }
-
-    //fecha con menos ventas en cantidad
-    char* fecha_menos_pizzas = dlsp(&count, orders);
-    if (fecha_menos_pizzas) {
-        printf("Fecha con menos pizzas vendidas: %s\n", fecha_menos_pizzas);
-        free(fecha_menos_pizzas);
-    }
-
-    //promedio de pizzas por orden 
-    char* promedio_pizzas = apo(&count, orders);
-    if (promedio_pizzas) {
-        printf("%s\n", promedio_pizzas);
-        free(promedio_pizzas);
-    }
-
-    //promedio pizzas por dia
-    char* promedio_por_dia = apd(&count, orders);
-    if (promedio_por_dia) {
-        printf("%s\n", promedio_por_dia);
-        free(promedio_por_dia);
-    }
-
-    //ingrediente mas vendido
-    char* ingrediente_mas_vendido = ims(&count, orders);
-    if (ingrediente_mas_vendido) {
-        printf("Ingrediente más vendido: %s\n", ingrediente_mas_vendido);
-        free(ingrediente_mas_vendido);
-    }
-
-    //cantidad de pizzas por categoria
-    char* pizzas_por_categoria = hp(&count, orders);
-    if (pizzas_por_categoria) {
-        printf("Cantidad de pizzas por categoría:\n%s", pizzas_por_categoria);
-        free(pizzas_por_categoria);
-    }
-
     free(orders);
     fclose(file);
     return 0;
