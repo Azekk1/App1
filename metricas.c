@@ -57,7 +57,7 @@ char* pms(int *size, struct order *orders) {
         }
     }
 
-    //buscar indice de la pizza mas vendida
+    //buscando indice de la pizza mas vendida
     for (int i = 0; i < n_distintas; i++) {
         if (cantidades[i] > max_cantidad) {
             max_cantidad = cantidades[i];
