@@ -371,7 +371,7 @@ char* apd(int *size, struct order *orders) {
     return resultado;
 }
 
-//INGGREDIENTE MAS VENDIDO
+//INGREDIENTE MAS VENDIDO ims
 char* ims(int *size, struct order *orders) {
     char ingredientes[MAX_ORDERS * 5][MAX_NAME_LENGTH];
     int cantidades[MAX_ORDERS * 5];
