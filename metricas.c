@@ -31,7 +31,7 @@ void limpiar_entrada(char* str) {
     }
 }
 
-//CALCULAMOS PIZZA MAS VENDIDA - pms
+//CREANDO CALCULO PIZZA MAS VENDIDA - pms
 char* pms(int *size, struct order *orders) {
     int max_cantidad = 0;
     int index_mas_vendida = -1;
@@ -57,7 +57,7 @@ char* pms(int *size, struct order *orders) {
         }
     }
 
-    //buscar indice de la pizza mas vendida
+    //buscando indice de la pizza mas vendida
     for (int i = 0; i < n_distintas; i++) {
         if (cantidades[i] > max_cantidad) {
             max_cantidad = cantidades[i];
@@ -193,7 +193,7 @@ char* dls(int *size, struct order *orders) {
 
     if (n_fechas == 0) return NULL;
 
-    // Buscar la fecha con menor recaudación
+    // Buscar la fecha en el registro con menor recaudación
     float min_monto = montos[0];
     int index_min = 0;
 
