@@ -371,7 +371,7 @@ char* apd(int *size, struct order *orders) {
     return resultado;
 }
 
-//INGREDIENTE MAS VENDIDO ims
+// INGREDIENTE MAS VENDIDO ims
 char* ims(int *size, struct order *orders) {
     char ingredientes[MAX_ORDERS * 5][MAX_NAME_LENGTH];
     int cantidades[MAX_ORDERS * 5];
@@ -524,7 +524,7 @@ int main(int argc, char *argv[]) {
     char line[MAX_LINE_LENGTH];
     int count = 0;
 
-    //saltamos primera linea
+    //Saltamos primera linea
     fgets(line, sizeof(line), file);
 
     while (fgets(line, sizeof(line), file) && count < MAX_ORDERS) {
